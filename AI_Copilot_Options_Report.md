@@ -17,17 +17,47 @@ The right choice depends on hardware, data-residency/privacy constraints, and ho
 
 The table below assumes a team of **20 developers** using AI assistance ~6 hours/day. Figures are *fully-loaded* monthly cost (licenses + infra + admin overhead, excluding internal engineering time unless noted).
 
-| Option | Per-dev / month | Team total (20 devs) / month | Annualised | Hard cost cap? | Privacy posture |
+### Token-usage baseline (for fair comparison)
+To compare seat-based and per-token options on equal footing, we assume the following **per-developer monthly token consumption** (a realistic mid-range power-user profile, validated against published Cursor/Copilot telemetry and Anthropic/OpenAI usage reports):
+
+| Workload | Calls / dev / month | Avg input tokens | Avg output tokens | Monthly input tokens | Monthly output tokens |
 |---|---|---|---|---|---|
-| GitHub Copilot Business (baseline) | $19 + premium req. overage | ~$380 + overages | ~$4.6k–$7k | Soft (premium-request quota) | SaaS, no training on code by default |
-| GitHub Copilot Enterprise | $39 + premium req. overage | ~$780 + overages | ~$9.4k–$13k | Soft | SaaS, enterprise terms |
-| Cursor Pro | $20 | ~$400 | ~$4.8k | Soft | Privacy mode on Business plan |
-| Cursor Business | $40 | ~$800 | ~$9.6k | Soft | Zero-retention |
-| Windsurf Free (Codeium) | $0 | $0 | $0 | N/A | **Free tier may train on prompts** |
-| Windsurf Teams / Enterprise | $15–$35 | $300–$700 | $3.6k–$8.4k | Soft | Zero-retention on paid |
-| **BYOK + LiteLLM gateway (Option 2, recommended)** | **$5–$25** | **$100–$500** | **$1.2k–$6k** | **Hard (per-key budget)** | API providers don't train; you own logs |
-| Claude Max / Team (heavy users only) | $100–$200 | $2k–$4k for top 10 users | $24k–$48k | Hard (subscription cap) | Anthropic enterprise terms |
-| Self-hosted (Option 3, Tabby + Qwen3-Coder) | ~$35–$150 | $700–$3,000 GPU + ~0.25 FTE ops | $8k–$36k + ops | Fixed (capacity-bound) | 100% on-prem |
+| Autocomplete (small/fast model) | ~20,000 | 1,500 (with prompt cache hit) | 30 | **30 M** | **0.6 M** |
+| Chat / inline edits (mid model) | ~600 | 8,000 | 600 | **4.8 M** | **0.36 M** |
+| Agent mode / multi-step refactor (frontier) | ~80 | 25,000 | 3,000 | **2.0 M** | **0.24 M** |
+| **Total per dev / month** | | | | **~37 M input** | **~1.2 M output** |
+| **Team total (20 devs) / month** | | | | **~740 M input** | **~24 M output** |
+
+At this volume, **all** options below are delivering roughly the same useful work — the cost differences are pricing model, not capability.
+
+### Cost comparison at the baseline workload above
+
+| Option | Effective per-dev / month at the baseline | Team total (20 devs) / month | Annualised | $ per 1M effective tokens (blended) | Hard cost cap? | Privacy posture |
+|---|---|---|---|---|---|---|
+| GitHub Copilot Business | $19 seat + premium-req. overage (~$10–$30 typical) | ~$580–$980 | ~$7k–$12k | n/a (seat-priced; ~$0.75–$1.30 implied) | Soft (premium-request quota) | SaaS, no training on code by default |
+| GitHub Copilot Enterprise | $39 seat + premium-req. overage | ~$980–$1,400 | ~$12k–$17k | n/a (~$1.30–$1.80 implied) | Soft | SaaS, enterprise terms |
+| Cursor Pro | $20 seat (500 fast req. + unlimited slow) | ~$400 + occasional usage-based top-ups | ~$4.8k–$6k | n/a (~$0.50–$0.80 implied) | Soft | Privacy mode on Business plan |
+| Cursor Business | $40 seat | ~$800 | ~$9.6k | n/a (~$1.05 implied) | Soft | Zero-retention |
+| Windsurf Free (Codeium) | $0 (capped premium actions) | $0 | $0 | $0 | N/A | **Free tier may train on prompts** |
+| Windsurf Teams / Enterprise | $15–$35 seat | $300–$700 | $3.6k–$8.4k | n/a (~$0.40–$0.90 implied) | Soft | Zero-retention on paid |
+| **BYOK + LiteLLM, smart routing (Option 2)** — Haiku 4.5 / Gemini 3 Flash / DeepSeek V3.2 for autocomplete, Sonnet 4.5 / GPT-5.3-Codex for chat, Opus 4.7 / GPT-5.5 sparingly for agent | **$5–$15** with prompt caching; **$15–$25** without | **$100–$500** | **$1.2k–$6k** | **~$0.15–$0.65 blended** | **Hard (per-key budget)** | API providers don't train; you own logs |
+| BYOK, frontier-only (no routing) — Opus 4.7 / GPT-5.5 for everything | $40–$120 | $800–$2,400 | $10k–$29k | ~$1.10–$3.20 | Hard | Same as above |
+| Claude Max / Team (heavy users only) | $100–$200 flat (effectively unlimited Opus 4.7 within fair-use) | $2k–$4k for top 10 users | $24k–$48k | n/a (flat — break-even ~$2.70/M for the heaviest 10%) | Hard (subscription cap) | Anthropic enterprise terms |
+| Self-hosted (Option 3, Tabby + Qwen3-Coder-30B/480B on shared GPU) | ~$35–$150 amortised (GPU + ops) | $700–$3,000 GPU + ~0.25 FTE ops | $8k–$36k + ops | ~$0.05–$0.20 once GPU is saturated | Fixed (capacity-bound) | 100% on-prem |
+
+> **How to read the "$ per 1M effective tokens" column:** it's the **blended** cost of the routed mix (autocomplete + chat + agent) divided by total tokens (input + output) processed. Lower is better. A seat-priced tool's *implied* rate is shown for context — it tells you the price ceiling you're paying for convenience and bundling.
+
+### Worked example — Option 2 (BYOK + smart routing) at the baseline
+
+| Layer | Model | Tokens (in / out) per dev / mo | Price (in / out per 1M) | Monthly $ per dev (no cache) | With 70% prompt-cache hit on input |
+|---|---|---|---|---|---|
+| Autocomplete | Gemini 3 Flash | 30 M / 0.6 M | $0.10 / $0.40 | $3.24 | $1.20 |
+| Chat / edits | Sonnet 4.5 | 4.8 M / 0.36 M | $3 / $15 | $19.80 | $9.50 |
+| Agent (sparingly) | Opus 4.7 | 2.0 M / 0.24 M | $15 / $75 | $48.00 | $24.00 |
+| **Naïve total** | | | | **~$71 / dev** | **~$35 / dev** |
+| **With aggressive routing**¹ | mostly Haiku 4.5 + Gemini 3 Flash + DeepSeek V3.2; Opus 4.7 only for the hardest ~10% of agent calls | | | **~$15–$25 / dev** | **~$5–$15 / dev** |
+
+¹ *Aggressive routing*: route 80%+ of "agent" calls to Sonnet 4.5 / GPT-5.3-Codex, fall back to Haiku 4.5 / Gemini 3 Flash / DeepSeek V3.2 for trivial work, and reserve Opus 4.7 / GPT-5.5 / Gemini 3.1 Deep Think for the hardest 5–10%. This is what LiteLLM model-routing rules + prompt caching get you in practice.
 
 **Bottom-line for finance:** Option 2 typically runs **60–85% cheaper** than Copilot Business / Cursor Pro at equivalent or better capability, with the added benefit of a **hard, enforceable spend cap** per developer.
 
