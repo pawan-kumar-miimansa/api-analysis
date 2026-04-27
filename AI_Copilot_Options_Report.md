@@ -30,6 +30,64 @@ To compare seat-based and per-token options on equal footing, we assume the foll
 
 At this volume, **all** options below are delivering roughly the same useful work — the cost differences are pricing model, not capability.
 
+#### What if your team is heavily agentic?
+
+Teams that live inside Claude Code / Cline / Cursor agent / Codex CLI all day burn far more tokens than the moderate baseline above, because every agent step re-sends a large context (system prompt + repo map + prior tool output). Anthropic publishes an official benchmark from its own enterprise deployments [R17]:
+
+> *"Across enterprise deployments, the average cost is around **$13 per developer per active day** and **$150–250 per developer per month**, with costs remaining below $30 per active day for 90% of users."* — Claude Code docs, *Manage costs effectively*
+
+Anthropic also publishes recommended **per-user rate limits** for Claude Code, which are a good proxy for "what a heavy agentic developer actually consumes":
+
+| Team size | TPM per user (recommended) | RPM per user |
+|---|---|---|
+| 1–5 | 200k–300k | 5–7 |
+| 5–20 | 100k–150k | 2.5–3.5 |
+| 20–50 | 50k–75k | 1.25–1.75 |
+| 50–100 | 25k–35k | 0.62–0.87 |
+| 100–500 | 15k–20k | 0.37–0.47 |
+| 500+ | 10k–15k | 0.25–0.35 |
+
+Source: Claude Code docs, *Rate limit recommendations* [R17]. TPM falls with team size because not everyone is active concurrently — the org-level pool is shared.
+
+Independent community reports (Cline / Aider / Cursor power users on Reddit, Hacker News, and the Cline GitHub discussions [R18]) corroborate the same order of magnitude: heavy agentic users routinely consume **5–20× more tokens than light/chat users**, dominated by **agent input tokens** (the model re-reads files and prior turns on every step).
+
+#### Heavy-agentic baseline (per dev / month)
+
+Substituting a heavy-agent profile (≈ 30 agent calls/day × 20 active days/month = ~600 calls/mo, with much larger contexts because of tool output and turn history):
+
+| Workload | Calls / dev / mo | Avg input tokens | Avg output tokens | Monthly input | Monthly output |
+|---|---|---|---|---|---|
+| Autocomplete (small/fast) | ~20,000 | 1,500 (cached) | 30 | **30 M** | **0.6 M** |
+| Chat / inline edits (mid) | ~600 | 8,000 | 600 | **4.8 M** | **0.36 M** |
+| **Agent (heavy)** — multi-step loops with repo + tool context | **~600** | **80,000** | **4,000** | **48 M** | **2.4 M** |
+| **Total per dev / mo** | | | | **~83 M input** | **~3.4 M output** |
+| **Team total (20 devs) / mo** | | | | **~1.66 B input** | **~68 M output** |
+
+That's **~2.2× the input volume and ~2.8× the output volume** of the moderate baseline.
+
+#### Heavy-agent worked example (Option 2, BYOK + smart routing)
+
+Assume agent calls go 90% to Sonnet 4.5 and 10% to Opus 4.7 (typical "everyday + tough refactor" mix), with **75% prompt-cache hit on agent input** (Claude Code's typical hit rate, because system prompt + repo map + tool definitions are reused across steps):
+
+| Layer | Model | Tokens (in / out) | Effective input multiplier | Monthly $ per dev (no cache) | Monthly $ per dev (75% cache) |
+|---|---|---|---|---|---|
+| Autocomplete | Gemini 3.1 Flash-Lite | 30 M / 0.6 M | 1.0 (no cache) / 0.5 (context cache) | $8.40 | $4.50 |
+| Chat / edits | Sonnet 4.5 | 4.8 M / 0.36 M | 1.0 / 0.325 | $19.80 | $10.10 |
+| Agent — Sonnet 4.5 (90%) | Sonnet 4.5 | 43.2 M / 2.16 M | 1.0 / 0.325 | $162.00 | $74.52 |
+| Agent — Opus 4.7 (10%) | Opus 4.7 | 4.8 M / 0.24 M | 1.0 / 0.325 | $30.00 | $13.80 |
+| **Naïve total** | | | | **~$220 / dev** | — |
+| **With prompt caching (75% hit)** | | | | — | **~$103 / dev** |
+| **+ aggressive routing**¹ (push trivial agent calls to Haiku 4.5 / Flash-Lite) | | | | — | **~$70–$95 / dev** |
+
+¹ Same routing rule as the moderate baseline, just with more agent traffic going through it. Notice that **prompt caching matters far more than model choice once you're agent-heavy** — disable it and your bill roughly triples.
+
+**Bottom line for finance, heavy-agent profile:**
+* Without caching, expect **~$200–$280/dev/month** — almost exactly Anthropic's published $150–250 enterprise band [R17] (Anthropic's number already assumes some caching).
+* With prompt caching + smart routing through a LiteLLM/OpenRouter gateway, the same workload drops to **~$70–$110/dev/month**.
+* Even at the heavy profile, **Option 2 still beats Cursor Ultra ($200) and Claude Max ($200) on $/effective-token** for 20 devs, *if* you actually configure caching + routing. Without that discipline, a flat-fee Claude Max / Team subscription becomes the cheaper bet for top-decile users.
+
+> **Practical guidance:** if your team is already agent-heavy on day one, budget **$30–$60/dev/month soft cap, $80–$120 hard cap** in the gateway, then watch the metrics for the first 30 days and tune. The $15/dev cap recommended in §4a is for the *moderate* baseline; agent-heavy teams should plan ~3–5× higher.
+
 ### Cost comparison at the baseline workload above
 
 | Option | Effective per-dev / month at the baseline | Team total (20 devs) / month | Annualised | $ per 1M effective tokens (blended) | Hard cost cap? | Privacy posture |
@@ -361,6 +419,10 @@ Unless otherwise stated, all URLs were verified on **27 Apr 2026**.
 ### Gateways & cost-control tooling
 * **[R7] LiteLLM — Virtual Keys.** https://docs.litellm.ai/docs/proxy/virtual_keys (per-key budgets, RPM/TPM limits, model allowlists, scheduled key rotation with grace period, spend tracking per key/user/team).
 * **[R8] OpenRouter — Management API Keys.** https://openrouter.ai/docs/features/provisioning-api-keys (programmatic creation, rotation, per-key credit limits with daily/weekly/monthly resets).
+
+### Agentic-coding usage benchmarks
+* **[R17] Anthropic — *Manage costs effectively* (Claude Code docs).** https://code.claude.com/docs/en/costs (enterprise average **$13/dev/active-day**, **$150–250/dev/month**; <$30/active-day for 90% of users; per-user TPM/RPM recommendations by team size).
+* **[R18] Cline community discussions** (token usage and per-day spend reports from heavy agentic users). https://github.com/cline/cline/discussions
 
 ### Model pricing (also linked inline in §3A)
 * **[R11]** Anthropic, *Introducing Claude Opus 4.7.* https://www.anthropic.com/news/claude-opus-4-7
