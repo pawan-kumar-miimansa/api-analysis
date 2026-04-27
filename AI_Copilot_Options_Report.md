@@ -2,7 +2,7 @@
 *Last updated: April 2026*
 
 ## 1. Executive Summary
-GitHub Copilot Business now sits at $19/user/month and Copilot Enterprise at $39/user/month, with premium "agent-mode" requests (Claude Opus 4.7, GPT-5.5, Gemini 3.1 Pro) metered on top via the premium-request quota. For a growing team this becomes expensive fast, and many orgs also want stricter data-handling guarantees than the default SaaS terms.
+GitHub Copilot Business sits at **$19/user/month** and Copilot Enterprise at **$39/user/month**, with premium "agent-mode" requests (Claude Opus 4.7, GPT-5.5, Gemini 3.1 Pro) metered on top via the premium-request quota [R1]. For a growing team this becomes expensive fast, and many orgs also want stricter data-handling guarantees than the default SaaS terms.
 
 There are now three credible cost-saving strategies:
 1. **Managed Freemium / Low-Cost Alternatives** — e.g., Windsurf (formerly Codeium), Cursor Hobby, Cody Free, Supermaven Free.
@@ -34,12 +34,14 @@ At this volume, **all** options below are delivering roughly the same useful wor
 
 | Option | Effective per-dev / month at the baseline | Team total (20 devs) / month | Annualised | $ per 1M effective tokens (blended) | Hard cost cap? | Privacy posture |
 |---|---|---|---|---|---|---|
-| GitHub Copilot Business | $19 seat + premium-req. overage (~$10–$30 typical) | ~$580–$980 | ~$7k–$12k | n/a (seat-priced; ~$0.75–$1.30 implied) | Soft (premium-request quota) | SaaS, no training on code by default |
-| GitHub Copilot Enterprise | $39 seat + premium-req. overage | ~$980–$1,400 | ~$12k–$17k | n/a (~$1.30–$1.80 implied) | Soft | SaaS, enterprise terms |
-| Cursor Pro | $20 seat (500 fast req. + unlimited slow) | ~$400 + occasional usage-based top-ups | ~$4.8k–$6k | n/a (~$0.50–$0.80 implied) | Soft | Privacy mode on Business plan |
-| Cursor Business | $40 seat | ~$800 | ~$9.6k | n/a (~$1.05 implied) | Soft | Zero-retention |
-| Windsurf Free (Codeium) | $0 (capped premium actions) | $0 | $0 | $0 | N/A | **Free tier may train on prompts** |
-| Windsurf Teams / Enterprise | $15–$35 seat | $300–$700 | $3.6k–$8.4k | n/a (~$0.40–$0.90 implied) | Soft | Zero-retention on paid |
+| GitHub Copilot Business [R1] | $19 seat + premium-req. overage (~$10–$30 typical) | ~$580–$980 | ~$7k–$12k | n/a (seat-priced; ~$0.75–$1.30 implied) | Soft (premium-request quota) | SaaS, no training on code by default |
+| GitHub Copilot Enterprise [R1] | $39 seat + premium-req. overage | ~$980–$1,400 | ~$12k–$17k | n/a (~$1.30–$1.80 implied) | Soft | SaaS, enterprise terms |
+| Cursor Pro [R2] | $20 seat (extended Agent + frontier-model access) | ~$400 + occasional usage-based top-ups | ~$4.8k–$6k | n/a (~$0.50–$0.80 implied) | Soft | Privacy mode on Teams plan |
+| Cursor Pro+ / Ultra [R2] | $60 / $200 seat (3× / 20× usage of Pro) | $1.2k–$4k for power users | $14k–$48k | n/a | Soft | Same |
+| Cursor Teams [R2] | **$40** seat (centralised billing, SSO, RBAC, privacy mode) | ~$800 | ~$9.6k | n/a (~$1.05 implied) | Soft | Zero-retention |
+| Windsurf Free [R3] | $0 (light Cascade quota, limited models) | $0 | $0 | $0 | N/A | **Free tier may train on prompts** |
+| Windsurf Pro / Max [R3] | $20 / $200 seat (individual; extra usage at API price) | $400–$4,000 | $4.8k–$48k | n/a | Soft | Zero-retention on paid |
+| Windsurf Teams / Enterprise [R3] | **$40** seat / custom | $800 / custom | $9.6k / custom | n/a (~$1.05 implied) | Soft | Automated zero-retention; SSO + RBAC on Enterprise |
 | **BYOK + LiteLLM, smart routing (Option 2)** — Haiku 4.5 / Gemini 3.1 Flash-Lite / DeepSeek-V4-Flash for autocomplete, Sonnet 4.5 / GPT-5.3-Codex for chat, Opus 4.7 / GPT-5.5 sparingly for agent | **$10–$25** with prompt caching; **$25–$50** without | **$200–$1,000** | **$2.4k–$12k** | **~$0.30–$1.05 blended** | **Hard (per-key budget)** | API providers don't train; you own logs |
 | BYOK, frontier-only (no routing) — Opus 4.7 / GPT-5.5 for everything | $180–$250 | $3.6k–$5k | $43k–$60k | ~$5.00–$6.50 | Hard | Same as above |
 | Claude Max / Team (heavy users only) | $100–$200 flat (effectively unlimited Opus 4.7 within fair-use) | $2k–$4k for top 10 users | $24k–$48k | n/a (flat — break-even ~$2.70/M for the heaviest 10%) | Hard (subscription cap) | Anthropic enterprise terms |
@@ -62,7 +64,8 @@ At this volume, **all** options below are delivering roughly the same useful wor
 **Bottom-line for finance:** Option 2 typically runs **60–85% cheaper** than Copilot Business / Cursor Pro at equivalent or better capability, with the added benefit of a **hard, enforceable spend cap** per developer.
 
 ### Illustrative ROI
-* Copilot-style tools have been independently measured to deliver **20–40% productivity gains** on common coding tasks. At a fully-loaded developer cost of ~$10k/month, even a 5% gain ($500/dev/month) pays back any of the options above many times over.
+* Copilot-style tools have been independently measured to deliver meaningful productivity gains on common coding tasks. The most-cited controlled experiment (Peng et al., GitHub/MIT, 2023) found developers using GitHub Copilot completed a JavaScript HTTP-server task **55.8% faster** than the control group, with a 95% CI of [21%, 89%] [R4]. GitHub's own multi-thousand-developer survey reported **60–87% agreement** on improved focus, satisfaction, and faster completion [R5]. More recent independent work (METR, 2025) shows the picture is mixed for senior engineers on large familiar codebases, where speed-ups can be small or negative without good prompt/context discipline [R6].
+* At a fully-loaded developer cost of ~$10k/month, even a conservative 5% gain ($500/dev/month) pays back any of the options below many times over.
 * The decision is therefore rarely "should we adopt AI coding tools?" but **"how do we adopt them with predictable spend, defensible privacy, and central control?"** — which is what the rest of this report addresses.
 
 ---
@@ -171,16 +174,17 @@ If you go BYOK, **never hand raw provider keys to developers.** Front everything
 ### Recommended: LiteLLM Proxy (open source, self-hosted)
 1. Deploy LiteLLM Proxy on a small VM or in Kubernetes (Docker image available).
 2. Add corporate Anthropic / OpenAI / Google / DeepSeek keys as upstreams.
-3. Issue a **virtual key per developer** (or per team) with:
+3. Issue a **virtual key per developer** (or per team) with [R7]:
    * **Hard monthly budget** (e.g., $15/dev) — requests are rejected when exceeded.
    * **RPM / TPM rate limits** to prevent runaway agent loops.
-   * **Allowed-model lists** (e.g., autocomplete key → only Haiku 4.5 / Gemini 3 Flash / DeepSeek V3.2; chat key → Sonnet 4.5 / GPT-5.3-Codex; agent key → Opus 4.7 / GPT-5.5 with stricter caps).
+   * **Allowed-model lists** (e.g., autocomplete key → only Haiku 4.5 / Gemini 3.1 Flash-Lite / DeepSeek-V4-Flash; chat key → Sonnet 4.5 / GPT-5.3-Codex; agent key → Opus 4.7 / GPT-5.5 with stricter caps).
    * **Tags / metadata** for per-project cost attribution.
+   * **Auto-rotation** of the virtual keys on a fixed interval (e.g. 90 days) with a configurable grace period.
 4. Point Continue / Cline / Roo Code / Aider / Claude Code / Codex CLI at the proxy URL using each dev's virtual key.
 5. Pipe logs to Langfuse, Helicone, or Prometheus/Grafana for usage dashboards.
 
 ### Alternatives
-* **OpenRouter** — managed gateway with budgets, 100+ models, single invoice; great if you don't want to host anything. Slight markup vs. direct provider pricing.
+* **OpenRouter** — managed gateway with budgets, 400+ models, single invoice and a Management API for programmatic key creation, rotation, and per-key spend limits [R8]. Great if you don't want to host anything; small markup vs. direct provider pricing.
 * **Portkey** — managed/self-hostable AI gateway with guardrails, caching, fallbacks; strong for enterprises wanting SOC 2 + audit out of the box.
 * **Cloudflare AI Gateway** — cheap/free at low volume, good caching and analytics, less granular budget control.
 
@@ -262,16 +266,19 @@ Tools that produce most of this out-of-the-box: **Langfuse** (open-source), **He
 
 ## 5. Managed Freemium / Low-Cost Alternatives
 
-### Windsurf (formerly Codeium)
-Codeium rebranded to **Windsurf** in late 2024 (and Windsurf was the subject of a high-profile acquisition saga in 2025; the IDE/extension business continues to operate). The free extension is still excellent.
-* **Free tier:** Unlimited autocomplete + chat in VS Code / JetBrains, plus a limited number of premium "Cascade" agent actions per month in the Windsurf editor.
-* **Catch for teams:** Free-tier prompts/snippets may be used to improve the service unless you opt out / are on a paid tier; no central admin or SSO.
-* **Teams / Enterprise tier:** Zero data retention, SSO/SAML, admin console, usage analytics — typically ~$15–$35/user/month depending on plan.
+### Windsurf (formerly Codeium) [R3]
+Codeium rebranded to **Windsurf** in late 2024 (and Windsurf was the subject of a high-profile acquisition saga in 2025, ending with Cognition AI; the IDE/extension business continues to operate). The free extension is still useful.
+* **Free:** light Cascade quota, limited model availability, unlimited inline edits and Tab completions.
+* **Pro / Max ($20 / $200 per month):** standard / heavy quotas, full model availability, Devin Cloud sessions, extra usage at API price.
+* **Teams ($40/user/month):** centralised billing, admin dashboard, priority support, **automated zero data retention**.
+* **Enterprise (custom):** RBAC, SSO + access control, hybrid deployment, dedicated account management.
 
-### Cursor (closed-source IDE, BYOK or bundled)
+### Cursor (closed-source IDE, BYOK or bundled) [R2]
 * **Hobby:** Free, limited slow requests.
-* **Pro:** ~$20/user/month — bundled access to frontier models (Opus 4.7, Sonnet 4.5, GPT-5.5, GPT-5.3-Codex, Gemini 3.1 Pro) with agent mode and background agents.
-* **Business / Enterprise:** Privacy mode (no training/retention), SSO, admin dashboards, usage analytics.
+* **Pro ($20/user/month):** extended Agent limits and access to frontier models (Opus 4.7, Sonnet 4.5, GPT-5.5, GPT-5.3-Codex, Gemini 3.1 Pro), MCPs/skills/hooks, cloud agents.
+* **Pro+ / Ultra ($60 / $200/user/month):** 3× / 20× usage of Pro on the same model set; aimed at heavy power users.
+* **Teams ($40/user/month):** shared chats/commands/rules, centralised billing, usage analytics, org-wide privacy mode, RBAC, SAML/OIDC SSO.
+* **Enterprise (custom):** pooled usage, invoice/PO billing, SCIM, AI-code-tracking API, audit logs, granular admin controls.
 * Increasingly the default for teams who want one polished tool and don't need open source.
 
 ### Google Antigravity (free during preview)
@@ -280,14 +287,14 @@ Codeium rebranded to **Windsurf** in late 2024 (and Windsurf was the subject of 
 ### Supermaven
 * Acquired by Cursor in 2024; the standalone Supermaven extension still exists with a generous free tier and very long context for autocomplete. Less actively developed than before.
 
-### Sourcegraph Cody
-* Strong free tier with great repo-wide context (Sourcegraph indexing). Paid tiers add admin controls, BYOK, and on-prem deployment. Worth shortlisting if codebase context is your bottleneck.
+### Sourcegraph Cody / Enterprise Search [R9]
+* Sourcegraph has consolidated around its **Enterprise Search** plan (~$49/user/month) which bundles Deep Search, Code Search, MCP server, Batch Changes, and remote codebase context — useful for AI agents that need cross-repo grounding. Cody (the IDE assistant) ships against the same indexed context. Worth shortlisting if codebase context is your bottleneck.
 
 ### GitHub Copilot Free
 * Real, but limited (small monthly cap of completions + chat messages, mid-tier models only). Useful for individuals; not a team strategy.
 
-### Anthropic Claude Max / Team
-* Flat-fee subscriptions ($100–$200/month for Max; per-seat for Team) that bundle Claude Code usage with very high message caps on Opus 4.7 / Sonnet 4.5. Often the cheapest way to give heavy users unlimited Claude Code access without per-token budgeting.
+### Anthropic Claude Max / Team [R10]
+* Flat-fee subscriptions ($100–$200/month for Max; per-seat for Team) that bundle Claude Code usage with very high message caps on Opus 4.7 / Sonnet 4.5. Often the cheapest way to give heavy users effectively-unlimited Claude Code access without per-token budgeting (subject to fair-use).
 
 > **Privacy reality check:** All "free" tiers either rate-limit aggressively, retain data, or both. For commercial / regulated codebases, assume the free tier is *not* compliant unless the vendor's DPA explicitly says otherwise.
 
@@ -304,11 +311,11 @@ Codeium rebranded to **Windsurf** in late 2024 (and Windsurf was the subject of 
 ### Option 2 — "Cost/Performance Hybrid" *(recommended for most pro teams)*
 * **Frontend:** Continue.dev (chat + autocomplete) plus Cline / Roo Code or Claude Code / Codex CLI (agent mode), distributed via Continue Hub or a shared repo of configs.
 * **Backend routing (via LiteLLM proxy):**
-  * *Autocomplete:* Claude Haiku 4.5 **or** Gemini 3 Flash / 3.1 Flash-Lite **or** DeepSeek V3.2 **or** local Qwen2.5-Coder-3B via Ollama.
+  * *Autocomplete:* Claude Haiku 4.5 **or** Gemini 3 Flash / 3.1 Flash-Lite **or** DeepSeek-V4-Flash **or** local Qwen2.5-Coder-3B via Ollama.
   * *Chat / inline edits:* GPT-5.3-Codex, Sonnet 4.5, or Gemini 3.1 Pro (pick by team familiarity).
   * *Agent mode / hard refactors:* Claude Opus 4.7 (best agentic reliability), GPT-5.5 (best reasoning), or Gemini 3.1 Deep Think (long-context).
-* **Governance:** Per-dev virtual keys, $10–$30/month hard cap, model allowlists, prompt/context caching, Langfuse for observability.
-* **Cost:** Typically **$5–$25 per active dev/month**, fully capped.
+* **Governance:** Per-dev virtual keys, $15–$50/month hard cap, model allowlists, prompt/context caching, Langfuse for observability.
+* **Cost:** Typically **$10–$25 per active dev/month** with prompt caching and aggressive routing; **$25–$50** at naïve baseline.
 * **Privacy:** API providers don't train on your data; you control logging and retention.
 
 ### Option 3 — "Fully Self-Hosted / On-Prem"
@@ -327,8 +334,38 @@ Codeium rebranded to **Windsurf** in late 2024 (and Windsurf was the subject of 
 ---
 
 ## 7. Bottom Line
-* For **most teams** wanting maximum capability with strict budget control and acceptable privacy, go with **Option 2: Continue.dev (+ Cline/Roo Code or Claude Code) → LiteLLM proxy → Opus 4.7 / Sonnet 4.5 / Haiku 4.5 + Gemini 3.1 Pro / Flash + DeepSeek V3.2**, with per-dev monthly caps. Expect ~$5–$25/dev/month, fully observable and capped.
-* For **heavy power users**, layer in **Claude Max / Team subscriptions** for unmetered Opus 4.7 access via Claude Code.
+* For **most teams** wanting maximum capability with strict budget control and acceptable privacy, go with **Option 2: Continue.dev (+ Cline/Roo Code or Claude Code) → LiteLLM proxy → Opus 4.7 / Sonnet 4.5 / Haiku 4.5 + Gemini 3.1 Pro / Flash-Lite + DeepSeek-V4-Flash**, with per-dev monthly caps. Expect ~$10–$25/dev/month with caching, fully observable and capped.
+* For **heavy power users**, layer in **Claude Max / Team subscriptions** for effectively-unmetered Opus 4.7 access via Claude Code.
 * For **regulated workloads**, choose **Option 3 (Tabby or self-hosted Continue + Qwen3-Coder-30B/480B)**.
-* For **zero-setup / non-sensitive code**, **Windsurf Free** (formerly Codeium) remains the best free option, with **Google Antigravity** (free during Gemini 3 preview) and **Cody Free** as strong runners-up.
+* For **zero-setup / non-sensitive code**, **Windsurf Free** (formerly Codeium) remains a serviceable free option, with **Google Antigravity** (free during Gemini 3 preview) and **Cody Free** as runners-up.
 * Avoid **FauxPilot** and any setup that hands raw provider API keys directly to developers without a budgeted gateway in front.
+
+---
+
+## References
+
+Unless otherwise stated, all URLs were verified on **27 Apr 2026**.
+
+### Vendor pricing & product pages
+* **[R1] GitHub Copilot — Plans & pricing.** https://github.com/features/copilot/plans (Business $19/user/mo; Enterprise $39/user/mo; Pro $10; Pro+ $39; premium-request quotas).
+* **[R2] Cursor — Pricing.** https://cursor.com/pricing (Hobby free; Pro $20; Pro+ $60; Ultra $200; Teams $40/user; Enterprise custom).
+* **[R3] Windsurf — Plans and Pricing.** https://windsurf.com/pricing (Free; Pro $20; Max $200; Teams $40/user; Enterprise custom; automated zero data retention on Teams+).
+* **[R9] Sourcegraph — Pricing.** https://sourcegraph.com/pricing (Enterprise Search $49/user/mo).
+* **[R10] Anthropic / Claude — Pricing & plans.** https://claude.com/pricing (Claude Max, Team, Enterprise; API rates).
+
+### Productivity research
+* **[R4] Peng, S.; Kalliamvakou, E.; Cihon, P.; Demirer, M.** *The Impact of AI on Developer Productivity: Evidence from GitHub Copilot.* arXiv:2302.06590, Feb 2023. https://arxiv.org/abs/2302.06590 (treatment group 55.8% faster on a controlled JS HTTP-server task; 95% CI [21%, 89%]).
+* **[R5] Kalliamvakou, E.** *Research: quantifying GitHub Copilot's impact on developer productivity and happiness.* GitHub Blog, Sep 2022 (updated May 2024). https://github.blog/news-insights/research/research-quantifying-github-copilots-impact-on-developer-productivity-and-happiness/ (n>2,000 developers; 60–87% agreement on focus, satisfaction, faster completion).
+* **[R6] METR.** *Measuring the impact of AI on experienced open-source developer productivity.* 2025. https://metr.org/blog/2025-07-10-early-2025-ai-experienced-os-dev-study/ (mixed/sometimes-negative effects for senior devs on large, familiar codebases — context matters).
+
+### Gateways & cost-control tooling
+* **[R7] LiteLLM — Virtual Keys.** https://docs.litellm.ai/docs/proxy/virtual_keys (per-key budgets, RPM/TPM limits, model allowlists, scheduled key rotation with grace period, spend tracking per key/user/team).
+* **[R8] OpenRouter — Management API Keys.** https://openrouter.ai/docs/features/provisioning-api-keys (programmatic creation, rotation, per-key credit limits with daily/weekly/monthly resets).
+
+### Model pricing (also linked inline in §3A)
+* **[R11]** Anthropic, *Introducing Claude Opus 4.7.* https://www.anthropic.com/news/claude-opus-4-7
+* **[R12]** Google Cloud, *Vertex AI generative-AI pricing* (Anthropic & Gemini partner-model pricing). https://cloud.google.com/vertex-ai/generative-ai/pricing
+* **[R13]** OpenAI, *Developer Platform – API Pricing.* https://developers.openai.com/api/docs/pricing
+* **[R14]** Google AI for Developers, *Gemini Developer API pricing.* https://ai.google.dev/gemini-api/docs/pricing
+* **[R15]** DeepSeek, *Models & Pricing* (V4-Flash, V4-Pro). https://api-docs.deepseek.com/quick_start/pricing
+* **[R16]** OpenRouter, *Qwen3-Coder 480B A35B – effective pricing.* https://openrouter.ai/qwen/qwen3-coder
