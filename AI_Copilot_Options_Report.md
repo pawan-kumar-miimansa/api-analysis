@@ -136,6 +136,10 @@ The frontend is the IDE plug-in; it is decoupled from whichever LLM you point it
 * **Status:** Still the most mature open-source assistant for VS Code and JetBrains. Ships with **Continue Hub** for sharing team configs, custom assistants ("agents"), prompts, rules, and MCP servers — solving the old "every dev has their own config.json" problem.
 * **Pros:** First-class autocomplete + chat + agent mode, MCP tool support, swappable models per role (chat / autocomplete / edit / embed / rerank), and a self-hostable Hub for enterprises.
 * **Cons:** Agent mode is solid but still trails Claude Code / Cursor / Antigravity in raw "do the whole task" reliability on long-horizon work.
+* **Pricing [R19]:**
+  * **Starter — $3 / 1M tokens** (input + output, pay-as-you-go). Includes agent creation, integrations (Slack, Sentry, Snyk), and credits for frontier models. Note this is roughly the *blended* cost of frontier routing; Continue marks up direct API rates a small amount in exchange for a single invoice.
+  * **Team — $20 / seat / month**, including **$10 in model credits per seat**. Adds private team agents, agent allowlists, and Gmail/GitHub SSO. Effective per-token cost falls if you actually use the included credits.
+  * **Company — custom.** SAML/OIDC SSO, BYOK (use your own Anthropic/OpenAI/Google keys with no markup), invoicing, SLA. This is the tier most teams running Option 2 will land on, since it preserves direct provider pricing.
 
 ### Cline & Roo Code (VS Code, open-source)
 * **Status:** The two leading open-source **agentic** coding extensions. Roo Code is a community fork of Cline with extra modes (Architect / Code / Ask / Debug), custom modes, and improved diff editing.
@@ -410,6 +414,7 @@ Unless otherwise stated, all URLs were verified on **27 Apr 2026**.
 * **[R3] Windsurf — Plans and Pricing.** https://windsurf.com/pricing (Free; Pro $20; Max $200; Teams $40/user; Enterprise custom; automated zero data retention on Teams+).
 * **[R9] Sourcegraph — Pricing.** https://sourcegraph.com/pricing (Enterprise Search $49/user/mo).
 * **[R10] Anthropic / Claude — Pricing & plans.** https://claude.com/pricing (Claude Max, Team, Enterprise; API rates).
+* **[R19] Continue.dev — Pricing.** https://www.continue.dev/pricing (Starter $3/1M tokens; Team $20/seat/mo with $10 credits + SSO; Company custom with BYOK + SAML/OIDC + SLA).
 
 ### Productivity research
 * **[R4] Peng, S.; Kalliamvakou, E.; Cihon, P.; Demirer, M.** *The Impact of AI on Developer Productivity: Evidence from GitHub Copilot.* arXiv:2302.06590, Feb 2023. https://arxiv.org/abs/2302.06590 (treatment group 55.8% faster on a controlled JS HTTP-server task; 95% CI [21%, 89%]).
