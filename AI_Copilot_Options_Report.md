@@ -40,8 +40,8 @@ At this volume, **all** options below are delivering roughly the same useful wor
 | Cursor Business | $40 seat | ~$800 | ~$9.6k | n/a (~$1.05 implied) | Soft | Zero-retention |
 | Windsurf Free (Codeium) | $0 (capped premium actions) | $0 | $0 | $0 | N/A | **Free tier may train on prompts** |
 | Windsurf Teams / Enterprise | $15–$35 seat | $300–$700 | $3.6k–$8.4k | n/a (~$0.40–$0.90 implied) | Soft | Zero-retention on paid |
-| **BYOK + LiteLLM, smart routing (Option 2)** — Haiku 4.5 / Gemini 3 Flash / DeepSeek V3.2 for autocomplete, Sonnet 4.5 / GPT-5.3-Codex for chat, Opus 4.7 / GPT-5.5 sparingly for agent | **$5–$15** with prompt caching; **$15–$25** without | **$100–$500** | **$1.2k–$6k** | **~$0.15–$0.65 blended** | **Hard (per-key budget)** | API providers don't train; you own logs |
-| BYOK, frontier-only (no routing) — Opus 4.7 / GPT-5.5 for everything | $40–$120 | $800–$2,400 | $10k–$29k | ~$1.10–$3.20 | Hard | Same as above |
+| **BYOK + LiteLLM, smart routing (Option 2)** — Haiku 4.5 / Gemini 3.1 Flash-Lite / DeepSeek-V4-Flash for autocomplete, Sonnet 4.5 / GPT-5.3-Codex for chat, Opus 4.7 / GPT-5.5 sparingly for agent | **$10–$25** with prompt caching; **$25–$50** without | **$200–$1,000** | **$2.4k–$12k** | **~$0.30–$1.05 blended** | **Hard (per-key budget)** | API providers don't train; you own logs |
+| BYOK, frontier-only (no routing) — Opus 4.7 / GPT-5.5 for everything | $180–$250 | $3.6k–$5k | $43k–$60k | ~$5.00–$6.50 | Hard | Same as above |
 | Claude Max / Team (heavy users only) | $100–$200 flat (effectively unlimited Opus 4.7 within fair-use) | $2k–$4k for top 10 users | $24k–$48k | n/a (flat — break-even ~$2.70/M for the heaviest 10%) | Hard (subscription cap) | Anthropic enterprise terms |
 | Self-hosted (Option 3, Tabby + Qwen3-Coder-30B/480B on shared GPU) | ~$35–$150 amortised (GPU + ops) | $700–$3,000 GPU + ~0.25 FTE ops | $8k–$36k + ops | ~$0.05–$0.20 once GPU is saturated | Fixed (capacity-bound) | 100% on-prem |
 
@@ -51,13 +51,13 @@ At this volume, **all** options below are delivering roughly the same useful wor
 
 | Layer | Model | Tokens (in / out) per dev / mo | Price (in / out per 1M) | Monthly $ per dev (no cache) | With 70% prompt-cache hit on input |
 |---|---|---|---|---|---|
-| Autocomplete | Gemini 3 Flash | 30 M / 0.6 M | $0.10 / $0.40 | $3.24 | $1.20 |
-| Chat / edits | Sonnet 4.5 | 4.8 M / 0.36 M | $3 / $15 | $19.80 | $9.50 |
-| Agent (sparingly) | Opus 4.7 | 2.0 M / 0.24 M | $15 / $75 | $48.00 | $24.00 |
-| **Naïve total** | | | | **~$71 / dev** | **~$35 / dev** |
-| **With aggressive routing**¹ | mostly Haiku 4.5 + Gemini 3 Flash + DeepSeek V3.2; Opus 4.7 only for the hardest ~10% of agent calls | | | **~$15–$25 / dev** | **~$5–$15 / dev** |
+| Autocomplete | Gemini 3.1 Flash-Lite | 30 M / 0.6 M | $0.25 / $1.50 | $8.40 | $4.50 |
+| Chat / edits | Sonnet 4.5 | 4.8 M / 0.36 M | $3 / $15 | $19.80 | $11.10 |
+| Agent (sparingly) | Opus 4.7 | 2.0 M / 0.24 M | $5 / $25 | $16.00 | $9.70 |
+| **Naïve total** | | | | **~$44 / dev** | **~$25 / dev** |
+| **With aggressive routing**¹ | mostly Haiku 4.5 + Flash-Lite + DeepSeek-V4-Flash; Opus 4.7 / GPT-5.5 only for the hardest ~10% of agent calls | | | **~$10–$18 / dev** | **~$4–$10 / dev** |
 
-¹ *Aggressive routing*: route 80%+ of "agent" calls to Sonnet 4.5 / GPT-5.3-Codex, fall back to Haiku 4.5 / Gemini 3 Flash / DeepSeek V3.2 for trivial work, and reserve Opus 4.7 / GPT-5.5 / Gemini 3.1 Deep Think for the hardest 5–10%. This is what LiteLLM model-routing rules + prompt caching get you in practice.
+¹ *Aggressive routing*: route 80%+ of "agent" calls to Sonnet 4.5 / GPT-5.3-Codex, fall back to Haiku 4.5 / Gemini 3.1 Flash-Lite / DeepSeek-V4-Flash for trivial work, and reserve Opus 4.7 / GPT-5.5 / Gemini 3.1 Deep Think for the hardest 5–10%. This is what LiteLLM model-routing rules + prompt caching get you in practice.
 
 **Bottom-line for finance:** Option 2 typically runs **60–85% cheaper** than Copilot Business / Cursor Pro at equivalent or better capability, with the added benefit of a **hard, enforceable spend cap** per developer.
 
@@ -122,23 +122,37 @@ Because developers write code in bursts, paying per-token through an API is usua
 
 ### A. Commercial APIs
 
-| Model | Provider | Strengths | Indicative price (input / output, USD per 1M tok) |
-|---|---|---|---|
-| **Claude Opus 4.7** *(released Apr 16, 2026)* | Anthropic | New flagship — strongest agentic coding & long-horizon multi-step tasks | ~$15 / $75 |
-| **Claude Sonnet 4.5** | Anthropic | Workhorse coding model; near-Opus quality at ~5x lower cost | ~$3 / $15 |
-| **Claude Haiku 4.5** | Anthropic | Cheap, fast — great for autocomplete + small edits | ~$1 / $5 |
-| **GPT-5.5** *(released Apr 23, 2026)* | OpenAI | New flagship — top reasoning & tool use, strong on SWE-bench Pro | ~$1.50 / $12 |
-| **GPT-5.3-Codex** | OpenAI | Coding-specialised GPT-5.3 variant; pairs with Codex CLI / agents | ~$1.25 / $10 |
-| **GPT-5.4 / GPT-5.3 Instant** | OpenAI | Cheaper general-purpose tiers for chat & inline edits | ~$0.25–$1 / $2–$8 |
-| **Gemini 3.1 Pro** | Google | State-of-the-art reasoning + 1M-token context, very strong at "vibe coding" / agentic coding (Terminal-Bench 2.0 leader) | ~$2 / $12 |
-| **Gemini 3.1 Deep Think** | Google | Extended-thinking variant for the hardest problems (AI Ultra subscribers / API preview) | premium tier |
-| **Gemini 3 Flash / 3.1 Flash-Lite** | Google | Frontier-class quality at fraction of the cost; great for autocomplete and high-volume agents | ~$0.10–$0.30 / $0.40–$2.50 |
-| **DeepSeek V3.2 / R2** | DeepSeek | Near-frontier coding at ~10x lower cost; strong open-weights | ~$0.27 / $1.10 |
-| **Qwen3-Coder (API)** | Alibaba / OpenRouter | Strong open-weights coder, cheap via OpenRouter | ~$0.20 / $0.80 |
+All prices are **per 1M tokens, USD, standard (non-batch, non-flex) tier**, sourced directly from each provider's pricing pages on Apr 27, 2026 (see references at the end of this section). Prices for "Pro" / Vertex / Bedrock resale tiers can differ.
 
-Routing tip: use **Haiku 4.5 / GPT-5.3 Instant / Gemini 3 Flash / DeepSeek V3.2** for autocomplete and small edits, **Sonnet 4.5 / GPT-5.3-Codex / Gemini 3.1 Pro** for everyday chat and edits, and reserve **Opus 4.7 / GPT-5.5 / Gemini 3.1 Deep Think** for hard agentic refactors. Most teams find this cuts spend by 5–10x with negligible quality loss.
+| Model | Provider | Strengths | Input ($/1M tok) | Output ($/1M tok) | Notes / source |
+|---|---|---|---|---|---|
+| **Claude Opus 4.7** *(GA Apr 16, 2026)* | Anthropic | New flagship — strongest agentic coding & long-horizon multi-step tasks | **$5.00** | **$25.00** | Same price as Opus 4.6. [1] |
+| **Claude Sonnet 4.5** | Anthropic | Workhorse coding model; near-Opus quality at ~5x lower cost | **$3.00** | **$15.00** | [2] |
+| **Claude Haiku 4.5** | Anthropic | Cheap, fast — great for autocomplete + small edits | **$1.00** | **$5.00** | [2] |
+| **GPT-5.5** *(GA Apr 23, 2026)* | OpenAI | New flagship — top reasoning & tool use, strong on SWE-bench Pro | **$5.00** | **$30.00** | Cached input $0.50. [3] |
+| **GPT-5.5 Pro** | OpenAI | Highest-effort reasoning tier of GPT-5.5 | **$30.00** | **$180.00** | [3] |
+| **GPT-5.4** | OpenAI | More affordable flagship-class model for chat & code | **$2.50** | **$15.00** | Cached input $0.25. [3] |
+| **GPT-5.4 mini** | OpenAI | Strong mini for coding, computer use, sub-agents | **$0.75** | **$4.50** | [3] |
+| **GPT-5.4 nano** | OpenAI | Cheapest tier for autocomplete / classification | **$0.20** | **$1.25** | [3] |
+| **GPT-5.3-Codex** | OpenAI | Coding-specialised model; pairs with Codex CLI / agents | **$1.75** | **$14.00** | Specialized-models tier; cached input $0.175. [3] |
+| **Gemini 3.1 Pro Preview** | Google | State-of-the-art reasoning + 1M-token context, very strong agentic coding (Terminal-Bench 2.0 leader) | **$2.00** (≤200K) / **$4.00** (>200K) | **$12.00** (≤200K) / **$18.00** (>200K) | Includes thinking tokens; cache $0.20/$0.40. [4] |
+| **Gemini 3 Flash Preview** | Google | Frontier-class quality, built for speed; great for autocomplete & high-volume agents | **$0.50** (text/image/video) / **$1.00** (audio) | **$3.00** | [4] |
+| **Gemini 3.1 Flash-Lite Preview** | Google | Most cost-efficient Gemini 3, optimized for high-volume agentic + translation | **$0.25** / **$0.50** (audio) | **$1.50** | [4] |
+| **DeepSeek-V4-Flash** *(deepseek-chat)* | DeepSeek | Near-frontier coding at very low cost; default DeepSeek API model | **$0.14** (cache miss) / **$0.0028** (cache hit) | **$0.28** | Replaces V3.2 on the official API. [5] |
+| **DeepSeek-V4-Pro** | DeepSeek | Higher-tier reasoning & coding | **$0.435** *(limited-time 75% off until 2026-05-05; list $1.74)* | **$0.87** *(list $3.48)* | [5] |
+| **Qwen3-Coder-480B-A35B** | Alibaba / OpenRouter | Strong open-weights coder; cheapest via OpenRouter | **~$0.20** (weighted avg across providers) | **~$1.53** (weighted avg) | Alibaba list $0.22 / $1.80; tiered above 32K/128K context. [6] |
 
-Privacy note: Anthropic, OpenAI (API, not ChatGPT), and Google Vertex / AI Studio (paid) all contractually do **not** train on your API data by default. Always confirm DPA terms for your region.
+**Routing tip:** use **Haiku 4.5 / GPT-5.4 nano / Gemini 3 Flash / Gemini 3.1 Flash-Lite / DeepSeek-V4-Flash** for autocomplete and small edits, **Sonnet 4.5 / GPT-5.4 / GPT-5.3-Codex / Gemini 3.1 Pro** for everyday chat and edits, and reserve **Opus 4.7 / GPT-5.5 / GPT-5.5 Pro / Gemini 3.1 Deep Think** for hard agentic refactors. Most teams find this cuts spend by 5–10x with negligible quality loss.
+
+**Privacy note:** Anthropic, OpenAI (API, not ChatGPT), and Google Vertex / AI Studio (paid) all contractually do **not** train on your API data by default. Always confirm DPA terms for your region.
+
+#### References (verified Apr 27, 2026)
+1. Anthropic, *"Introducing Claude Opus 4.7"* — pricing line: "$5 per million input tokens and $25 per million output tokens." https://www.anthropic.com/news/claude-opus-4-7
+2. Google Cloud, *Vertex AI – Anthropic partner-model pricing* (Sonnet 4.5, Haiku 4.5 list match Anthropic API). https://cloud.google.com/vertex-ai/generative-ai/pricing
+3. OpenAI, *Developer Platform – API Pricing*. https://developers.openai.com/api/docs/pricing
+4. Google AI for Developers, *Gemini Developer API pricing* (Gemini 3.1 Pro / 3 Flash / 3.1 Flash-Lite). https://ai.google.dev/gemini-api/docs/pricing
+5. DeepSeek, *Models & Pricing* (V4-Flash and V4-Pro). https://api-docs.deepseek.com/quick_start/pricing
+6. OpenRouter, *Qwen3-Coder 480B A35B – effective pricing* (weighted average across providers). https://openrouter.ai/qwen/qwen3-coder
 
 ### B. Local / Self-Hosted Models
 Run via **Ollama** (laptops / small teams), **llama.cpp** (CPU/Metal), or **vLLM / SGLang / TGI** (server-side, high throughput).
