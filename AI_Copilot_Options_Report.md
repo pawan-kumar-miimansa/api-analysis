@@ -2,7 +2,7 @@
 *Last updated: April 2026*
 
 ## 1. Executive Summary
-GitHub Copilot Business sits at **$19/user/month** and Copilot Enterprise at **$39/user/month**, with premium "agent-mode" requests (Claude Opus 4.7, GPT-5.5, Gemini 3.1 Pro) metered on top via the premium-request quota [R1]. For a growing team this becomes expensive fast, and many orgs also want stricter data-handling guarantees than the default SaaS terms.
+GitHub Copilot Business sits at **$19/user/month** (300 premium requests/user/mo included) and Copilot Enterprise at **$39/user/month** (1,000 premium requests/user/mo included), with additional premium "agent-mode" requests (Claude Opus 4.7, GPT-5.5, Gemini 3.1 Pro, etc.) metered on top at **$0.04/request** [R1]. Individual tiers — Free (50 premium req/mo), Pro ($10/mo, 300 premium req), Pro+ ($39/mo, 1,500 premium req) — exist but new Pro/Pro+ sign-ups are temporarily paused as of Apr 20, 2026 [R1]. For a growing team this becomes expensive fast, and many orgs also want stricter data-handling guarantees than the default SaaS terms.
 
 There are now three credible cost-saving strategies:
 1. **Managed Freemium / Low-Cost Alternatives** — e.g., Windsurf (formerly Codeium), Cursor Hobby, Cody Free, Supermaven Free.
@@ -92,8 +92,8 @@ Assume agent calls go 90% to Sonnet 4.5 and 10% to Opus 4.7 (typical "everyday +
 
 | Option | Effective per-dev / month at the baseline | Team total (20 devs) / month | Annualised | $ per 1M effective tokens (blended) | Hard cost cap? | Privacy posture |
 |---|---|---|---|---|---|---|
-| GitHub Copilot Business [R1] | $19 seat + premium-req. overage (~$10–$30 typical) | ~$580–$980 | ~$7k–$12k | n/a (seat-priced; ~$0.75–$1.30 implied) | Soft (premium-request quota) | SaaS, no training on code by default |
-| GitHub Copilot Enterprise [R1] | $39 seat + premium-req. overage | ~$980–$1,400 | ~$12k–$17k | n/a (~$1.30–$1.80 implied) | Soft | SaaS, enterprise terms |
+| GitHub Copilot Business [R1] | $19 seat + premium-req. overage at $0.04/req beyond 300/user/mo (~$10–$30 typical) | ~$580–$980 | ~$7k–$12k | n/a (seat-priced; ~$0.75–$1.30 implied) | Soft (premium-request quota) | SaaS, no training on code by default |
+| GitHub Copilot Enterprise [R1] | $39 seat + premium-req. overage at $0.04/req beyond 1,000/user/mo | ~$980–$1,400 | ~$12k–$17k | n/a (~$1.30–$1.80 implied) | Soft | SaaS, enterprise terms |
 | Cursor Pro [R2] | $20 seat (extended Agent + frontier-model access) | ~$400 + occasional usage-based top-ups | ~$4.8k–$6k | n/a (~$0.50–$0.80 implied) | Soft | Privacy mode on Teams plan |
 | Cursor Pro+ / Ultra [R2] | $60 / $200 seat (3× / 20× usage of Pro) | $1.2k–$4k for power users | $14k–$48k | n/a | Soft | Same |
 | Cursor Teams [R2] | **$40** seat (centralised billing, SSO, RBAC, privacy mode) | ~$800 | ~$9.6k | n/a (~$1.05 implied) | Soft | Zero-retention |
@@ -409,7 +409,7 @@ Codeium rebranded to **Windsurf** in late 2024 (and Windsurf was the subject of 
 Unless otherwise stated, all URLs were verified on **27 Apr 2026**.
 
 ### Vendor pricing & product pages
-* **[R1] GitHub Copilot — Plans & pricing.** https://github.com/features/copilot/plans (Business $19/user/mo; Enterprise $39/user/mo; Pro $10; Pro+ $39; premium-request quotas).
+* **[R1] GitHub Copilot — Plans & pricing.** https://github.com/features/copilot/plans (Free $0 / 50 premium req/mo; Pro $10/mo / 300 premium req; Pro+ $39/mo / 1,500 premium req; Business $19/seat/mo / 300 premium req per user; Enterprise $39/seat/mo / 1,000 premium req per user; additional premium requests at **$0.04/request**; new Pro/Pro+ sign-ups temporarily paused as of 2026-04-20). Comparison table also at https://docs.github.com/en/copilot/get-started/plans
 * **[R2] Cursor — Pricing.** https://cursor.com/pricing (Hobby free; Pro $20; Pro+ $60; Ultra $200; Teams $40/user; Enterprise custom).
 * **[R3] Windsurf — Plans and Pricing.** https://windsurf.com/pricing (Free; Pro $20; Max $200; Teams $40/user; Enterprise custom; automated zero data retention on Teams+).
 * **[R9] Sourcegraph — Pricing.** https://sourcegraph.com/pricing (Enterprise Search $49/user/mo).
